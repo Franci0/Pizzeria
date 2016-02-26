@@ -50,7 +50,7 @@ public class Banner extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init();
         ServletContext ctx = config.getServletContext();
-        user = "admin";
+        user = "APP";
         url = "jdbc:derby://localhost:1527/Pizzeria";
         pwd = "admin";
 
@@ -72,7 +72,7 @@ public class Banner extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        String indexUrl = response.encodeURL("index");
+        String indexUrl = response.encodeURL("index.html");
         String azione = request.getParameter("action");
         HttpSession s = request.getSession();
 
@@ -102,13 +102,10 @@ public class Banner extends HttpServlet {
                 out.println("<p><a href=\"" + indexUrl + "\"Ricarica</a></p>");
 
             } else //controllo se l'utente è registrato da database
-            {
-                if (!username.isEmpty() && !password.isEmpty()) {
-                    if (checkUser(username, password)) {
-                        s.setAttribute("Username", username);
-                        //inserire link di logout
-                        out.println("<p><a href=\"" + indexUrl + "?action=invalida\">Logout</a></p>");
-                    }
+             if (!username.isEmpty() && !password.isEmpty() && checkUser(username, password)) {
+                    s.setAttribute("Username", username);
+                    //inserire link di logout
+                    out.println("<p>Benvenuto " + username + "<a href=\"" + indexUrl + "?action=invalida\"> Logout</a></p>");
                 } else {
                     out.println("<form action=Banner method=post>");
                     out.println("<p>Login</p>");
@@ -116,8 +113,6 @@ public class Banner extends HttpServlet {
                     out.println("<p>Password <input type=text name=pwd></p>");
                     out.println("<p><input type=submit name=submit value=Login></p></form>");
                 }
-            }
-
         } finally {
             //out.println("</body></html>");
             out.close();

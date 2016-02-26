@@ -26,12 +26,14 @@ import javax.servlet.http.HttpSession;
  *
  * @author Francesco
  */
-@WebServlet(name = "Banner", urlPatterns = {"/Banner"},
+@WebServlet(name = "Banner",
+        urlPatterns = {"/Banner"},
         initParams = {
             @WebInitParam(name = "DBUrl", value = "jdbc:derby://localhost:1527/Pizzeria", description = "URL del DB"),
             @WebInitParam(name = "DBuser", value = "admin", description = "Account per accedere al DB"),
             @WebInitParam(name = "DBpwd", value = "admin", description = "Password per accedere al DB")
-        })
+        }
+)
 
 public class Banner extends HttpServlet {
 
@@ -48,9 +50,9 @@ public class Banner extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init();
         ServletContext ctx = config.getServletContext();
-        user = ctx.getInitParameter("DBuser");
-        url = ctx.getInitParameter("DBUrl");
-        pwd = ctx.getInitParameter("DBpwd");
+        user = "admin";
+        url = "jdbc:derby://localhost:1527/Pizzeria";
+        pwd = "admin";
 
         try {
             DriverManager.registerDriver(new org.apache.derby.jdbc.ClientDriver());
@@ -70,15 +72,15 @@ public class Banner extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        String url = response.encodeURL("index");
+        String indexUrl = response.encodeURL("index");
         String azione = request.getParameter("action");
         HttpSession s = request.getSession();
 
         String username = "";
         String password = "";
 
-        Object usernameObj = request.getAttribute("nome");
-        Object passwordObj = request.getAttribute("pwd");
+        Object usernameObj = request.getParameter("nome");
+        Object passwordObj = request.getParameter("pwd");
 
         //controllo che esistano come parametri (non è la prima chiamata)
         if (usernameObj != null) {
@@ -86,7 +88,7 @@ public class Banner extends HttpServlet {
         }
 
         if (passwordObj != null) {
-            passwordObj.toString();
+            password = passwordObj.toString();
         }
 
         PrintWriter out = response.getWriter();
@@ -97,22 +99,24 @@ public class Banner extends HttpServlet {
 
             if (azione != null && azione.equals("invalida")) {
                 s.invalidate();
-                out.println("<p><a href=\"" + url + "\"Ricarica</a></p>");
+                out.println("<p><a href=\"" + indexUrl + "\"Ricarica</a></p>");
 
             } else //controllo se l'utente è registrato da database
-             if (!username.isEmpty() && !password.isEmpty()) {
+            {
+                if (!username.isEmpty() && !password.isEmpty()) {
                     if (checkUser(username, password)) {
                         s.setAttribute("Username", username);
                         //inserire link di logout
-                        out.println("<p><a href=\"" + url + "?action=invalida\">Logout</a></p>");
+                        out.println("<p><a href=\"" + indexUrl + "?action=invalida\">Logout</a></p>");
                     }
                 } else {
-                    out.println("<form action=index method=post>");
+                    out.println("<form action=Banner method=post>");
                     out.println("<p>Login</p>");
                     out.println("<p>Username<input type=text name=nome></p>");
                     out.println("<p>Password <input type=text name=pwd></p>");
                     out.println("<p><input type=submit name=submit value=Login></p></form>");
                 }
+            }
 
         } finally {
             //out.println("</body></html>");
